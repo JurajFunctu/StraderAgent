@@ -454,31 +454,60 @@ export function ProductAgent() {
                         {msg.content}
                       </div>
                       {msg.bom && (
-                        <Card className="glass-card border-blue-400/30">
-                          <CardHeader className="pb-3">
-                            <CardTitle className="text-sm text-white">Bill of Materials (BOM)</CardTitle>
+                        <Card className="glass-card border-green-400/30 bg-green-50/5">
+                          <CardHeader className="pb-3 bg-gradient-to-r from-green-500/20 to-emerald-500/20">
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <CardTitle className="text-base text-white flex items-center gap-2">
+                                  <Layers className="h-5 w-5 text-green-400" />
+                                  Rozpad zloženej položky
+                                </CardTitle>
+                                <CardDescription className="text-gray-300 mt-1">
+                                  AI automaticky vypočítala všetky potrebné komponenty
+                                </CardDescription>
+                              </div>
+                            </div>
                           </CardHeader>
                           <CardContent className="space-y-2">
                             {msg.bom.map((item, bomIdx) => (
-                              <div key={bomIdx} className="flex items-start justify-between text-xs p-2 rounded-lg glass border border-white/10">
+                              <div key={bomIdx} className="flex items-start justify-between text-xs p-3 rounded-lg glass border border-white/10">
                                 <div className="flex-1">
                                   <p className="font-semibold text-white">{item.quantity}x {item.product}</p>
-                                  <p className="text-gray-400">Kód: {item.code}</p>
+                                  <p className="text-gray-400 text-xs mt-0.5">Kód: {item.code}</p>
                                 </div>
                                 <div className="text-right ml-3">
-                                  <p className="text-gray-400">{item.quantity} × {formatCurrency(item.unitPrice)}</p>
-                                  <p className="font-bold text-blue-400">{formatCurrency(item.total)}</p>
+                                  <p className="text-gray-400 text-xs">{item.quantity} × {formatCurrency(item.unitPrice)}</p>
+                                  <p className="font-bold text-green-400 text-sm">{formatCurrency(item.total)}</p>
                                 </div>
                               </div>
                             ))}
-                            <div className="flex justify-between items-center pt-2 border-t border-white/10">
+                            <div className="flex justify-between items-center pt-3 border-t border-white/10">
                               <p className="font-semibold text-white">CELKOM:</p>
-                              <p className="text-2xl font-bold text-blue-400">{formatCurrency(msg.totalValue || 0)}</p>
+                              <p className="text-2xl font-bold text-green-400">{formatCurrency(msg.totalValue || 0)}</p>
                             </div>
-                            <Button className="w-full gradient-bg hover:scale-105 transition-all mt-2">
-                              <ShoppingCart className="h-4 w-4 mr-2" />
-                              Pridať do CP
-                            </Button>
+
+                            {/* Time Savings Message */}
+                            <div className="rounded-lg glass-card border-blue-400/30 bg-blue-400/5 p-3 mt-3">
+                              <p className="text-sm font-semibold text-blue-400 flex items-center gap-2">
+                                <Sparkles className="h-4 w-4" />
+                                ⚡ AI nahradil 45 min manuálneho vyhľadávania v MK Soft
+                              </p>
+                              <p className="text-xs text-gray-300 mt-1">
+                                Automatická kalkulácia {msg.bom.length} položiek s cenami, skladovými stavmi a zľavami
+                              </p>
+                            </div>
+
+                            {/* Action Buttons */}
+                            <div className="grid grid-cols-2 gap-2 mt-3">
+                              <Button className="gradient-bg hover:scale-105 transition-all">
+                                <Plus className="h-4 w-4 mr-2" />
+                                Pridať do CP
+                              </Button>
+                              <Button variant="outline" className="glass-card border-white/10 hover:scale-105 transition-all">
+                                <Package className="h-4 w-4 mr-2" />
+                                Exportovať PDF
+                              </Button>
+                            </div>
                           </CardContent>
                         </Card>
                       )}

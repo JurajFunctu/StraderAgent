@@ -272,6 +272,89 @@ export function InvoiceAgent() {
 
         {/* DL → FA Pipeline Tab */}
         <TabsContent value="dl-pipeline" className="space-y-4">
+          {/* Concrete Example Highlight */}
+          <Card className="glass-card border-green-400/30 bg-green-50/5">
+            <CardHeader className="bg-gradient-to-r from-green-500/20 to-emerald-500/20">
+              <CardTitle className="text-white flex items-center gap-2">
+                <CheckCircle className="h-5 w-5 text-green-400" />
+                Príklad: DL → FA automatizácia
+              </CardTitle>
+              <CardDescription className="text-gray-300">
+                AI automaticky vygeneroval faktúru z dodacieho listu
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="pt-4 space-y-3">
+              {/* Source & Result */}
+              <div className="grid md:grid-cols-2 gap-4">
+                <div className="glass-card border-blue-400/30 bg-blue-400/5 rounded-xl p-4">
+                  <div className="flex items-center gap-2 mb-3">
+                    <FileText className="h-5 w-5 text-blue-400" />
+                    <span className="font-semibold text-blue-400">Dodací list</span>
+                  </div>
+                  <div className="space-y-1.5 text-sm">
+                    <p className="text-white"><span className="text-gray-400">Číslo:</span> DL-2024/0892</p>
+                    <p className="text-white"><span className="text-gray-400">Zákazník:</span> ProfiStav s.r.o.</p>
+                    <p className="text-white"><span className="text-gray-400">Položky:</span> 4 ks</p>
+                    <p className="text-white"><span className="text-gray-400">Hodnota:</span> 3 847,50 €</p>
+                  </div>
+                </div>
+                <div className="glass-card border-green-400/30 bg-green-400/5 rounded-xl p-4">
+                  <div className="flex items-center gap-2 mb-3">
+                    <CheckCircle className="h-5 w-5 text-green-400" />
+                    <span className="font-semibold text-green-400">AI vygeneroval FA</span>
+                  </div>
+                  <div className="space-y-1.5 text-sm">
+                    <p className="text-white"><span className="text-gray-400">Číslo:</span> FA-2024/1847</p>
+                    <p className="text-white"><span className="text-gray-400">Zákazník:</span> ✅ Načítané</p>
+                    <p className="text-white"><span className="text-gray-400">DPH 20%:</span> ✅ Vypočítané</p>
+                    <p className="text-white"><span className="text-gray-400">QR kód:</span> ✅ Vygenerované</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* AI Fields Breakdown */}
+              <div className="glass-card rounded-lg p-3 border border-white/10">
+                <p className="text-xs font-semibold text-gray-300 mb-2">AI automaticky vyplnilo:</p>
+                <div className="grid grid-cols-3 gap-2 text-xs">
+                  <div className="flex items-center gap-1.5 text-gray-300">
+                    <CheckCircle className="h-3 w-3 text-green-400" />
+                    Zákazník + IČO
+                  </div>
+                  <div className="flex items-center gap-1.5 text-gray-300">
+                    <CheckCircle className="h-3 w-3 text-green-400" />
+                    4 položky s cenami
+                  </div>
+                  <div className="flex items-center gap-1.5 text-gray-300">
+                    <CheckCircle className="h-3 w-3 text-green-400" />
+                    DPH 20% (769,50 €)
+                  </div>
+                  <div className="flex items-center gap-1.5 text-gray-300">
+                    <CheckCircle className="h-3 w-3 text-green-400" />
+                    Splatnosť (30 dní)
+                  </div>
+                  <div className="flex items-center gap-1.5 text-gray-300">
+                    <CheckCircle className="h-3 w-3 text-green-400" />
+                    QR platobný kód
+                  </div>
+                  <div className="flex items-center gap-1.5 text-gray-300">
+                    <CheckCircle className="h-3 w-3 text-green-400" />
+                    IBAN a VS
+                  </div>
+                </div>
+              </div>
+
+              {/* Time Saved */}
+              <div className="rounded-lg glass-card border-blue-400/30 bg-blue-400/5 p-3">
+                <p className="text-sm font-semibold text-blue-400 mb-1">
+                  ⚡ Vygenerované za 3 sekundy (manuálne: 15-20 minút)
+                </p>
+                <p className="text-xs text-gray-300">
+                  AI ušetril účtovníčke priemerne 18 minút práce na každú faktúru
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+
           <Card className="glass-card border-white/10">
             <CardHeader>
               <CardTitle className="text-white flex items-center gap-2">

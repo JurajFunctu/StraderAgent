@@ -1,12 +1,11 @@
 import { useState, useEffect } from 'react';
-import { Mail, Building2, Clock, TrendingUp, CheckCircle2, AlertTriangle, Package, Euro, Target, ThumbsUp, ThumbsDown, Minus, User, Users, Filter } from 'lucide-react';
+import { Mail, Building2, Clock, TrendingUp, CheckCircle2, AlertCircle, Package, Euro, Target, ThumbsUp, ThumbsDown, Minus } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { api } from '@/lib/api';
 import { formatDate, formatCurrency, cn } from '@/lib/utils';
-import { emailScenarios, salesReps as mockSalesReps } from './email-scenarios';
 
 interface Email {
   id: number;
@@ -18,12 +17,8 @@ interface Email {
   status: string;
   aiSuggestedAction: string;
   aiConfidence: string;
-  assignedOzId: number | null;
-  assignedOzName: string | null;
+  assignedOzId: number;
   customerId: number;
-  hasDuplicateResponse?: boolean;
-  responseTime?: number | null;
-  scenario?: string;
   aiAnalysis?: {
     recognizedCustomer: {
       name: string;
@@ -566,7 +561,6 @@ export function CustomerAgent() {
   const [actionResult, setActionResult] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'ai' | 'original'>('ai');
   const [qKeyPressed, setQKeyPressed] = useState(false);
-  const [filter, setFilter] = useState<'all' | 'unassigned' | 'mine'>('all');
 
   useEffect(() => {
     loadData();
@@ -596,20 +590,23 @@ export function CustomerAgent() {
 
   const loadData = async () => {
     try {
-      const [customersData, repsData] = await Promise.all([
+      const [emailsData, customersData, repsData] = await Promise.all([
+        api.getEmails(),
         api.getCustomers(),
         api.getSalesReps(),
       ]);
       
-      // Use email scenarios with AI analysis
-      const enrichedEmails = emailScenarios.map((email) => ({
-        ...email,
-        aiAnalysis: mockAIAnalysis[email.id as keyof typeof mockAIAnalysis] || mockAIAnalysis[1],
-      }));
+      // Inject AI analysis and limit to 20 emails
+      const enrichedEmails = emailsData
+        .slice(0, 20)
+        .map((email: Email) => ({
+          ...email,
+          aiAnalysis: mockAIAnalysis[email.id as keyof typeof mockAIAnalysis] || mockAIAnalysis[1],
+        }));
       
       setEmails(enrichedEmails);
       setCustomers(customersData);
-      setSalesReps([...repsData, ...mockSalesReps]); // Combine API and mock sales reps
+      setSalesReps(repsData);
       if (enrichedEmails.length > 0) {
         setSelectedEmail(enrichedEmails[0]);
       }
@@ -620,34 +617,12 @@ export function CustomerAgent() {
     }
   };
 
-  // Filter emails based on current filter
-  const filteredEmails = emails.filter((email) => {
-    if (filter === 'unassigned') return !email.assignedOzId;
-    if (filter === 'mine') return email.assignedOzId === 1; // Mock: assuming current user is OZ#1 (Ján Novák)
-    return true; // 'all'
-  });
-
-  // Compute stats
-  const unassignedCount = emails.filter((e) => !e.assignedOzId).length;
-  const duplicateCount = emails.filter((e) => e.hasDuplicateResponse).length;
-  const avgResponseTime = Math.round(
-    emails.filter((e) => e.responseTime).reduce((sum, e) => sum + (e.responseTime || 0), 0) /
-    emails.filter((e) => e.responseTime).length || 12
-  );
-
   const getCustomer = (customerId: number) => {
     return customers.find((c) => c.id === customerId);
   };
 
   const getSalesRep = (repId: number) => {
     return salesReps.find((r) => r.id === repId);
-  };
-
-  const recommendOz = (email: Email) => {
-    // Simple recommendation logic based on workload
-    const availableReps = mockSalesReps.sort((a, b) => a.workload - b.workload);
-    const recommended = availableReps[0];
-    return `${recommended.name} (${recommended.region}, najnižšie vyťaženie: ${recommended.workload} dopyty)`;
   };
 
   const getStatusBadge = (status: string) => {
@@ -950,86 +925,10 @@ export function CustomerAgent() {
         <div className="border-b border-white/10 p-4 glass">
           <h2 className="text-lg font-semibold text-white">Prijaté správy</h2>
           <p className="text-sm text-gray-400">{emails.length} emailov</p>
-          
-          {/* Filter Buttons */}
-          <div className="mt-3 flex gap-2">
-            <Button
-              size="sm"
-              variant={filter === 'all' ? 'default' : 'outline'}
-              onClick={() => setFilter('all')}
-              className={cn(
-                'flex-1 text-xs',
-                filter === 'all' ? 'gradient-bg' : 'glass-card border-white/10'
-              )}
-            >
-              <Filter className="h-3 w-3 mr-1" />
-              Všetky
-            </Button>
-            <Button
-              size="sm"
-              variant={filter === 'unassigned' ? 'default' : 'outline'}
-              onClick={() => setFilter('unassigned')}
-              className={cn(
-                'flex-1 text-xs',
-                filter === 'unassigned' ? 'gradient-bg' : 'glass-card border-white/10'
-              )}
-            >
-              <AlertTriangle className="h-3 w-3 mr-1" />
-              Nepriradené
-            </Button>
-            <Button
-              size="sm"
-              variant={filter === 'mine' ? 'default' : 'outline'}
-              onClick={() => setFilter('mine')}
-              className={cn(
-                'flex-1 text-xs',
-                filter === 'mine' ? 'gradient-bg' : 'glass-card border-white/10'
-              )}
-            >
-              <User className="h-3 w-3 mr-1" />
-              Moje
-            </Button>
-          </div>
         </div>
-
-        {/* Warning Banner */}
-        {(unassignedCount > 0 || duplicateCount > 0 || avgResponseTime > 15) && (
-          <div className="border-b border-white/10 p-3 space-y-2">
-            {unassignedCount > 0 && (
-              <div className="rounded-lg glass-card border-yellow-400/30 bg-yellow-400/10 p-3">
-                <div className="flex items-center gap-2 text-yellow-400">
-                  <AlertTriangle className="h-4 w-4" />
-                  <span className="text-sm font-semibold">
-                    ⚠️ {unassignedCount} {unassignedCount === 1 ? 'dopyt' : 'dopyty'} bez priradenia
-                  </span>
-                </div>
-              </div>
-            )}
-            {duplicateCount > 0 && (
-              <div className="rounded-lg glass-card border-red-400/30 bg-red-400/10 p-3">
-                <div className="flex items-center gap-2 text-red-400">
-                  <AlertTriangle className="h-4 w-4" />
-                  <span className="text-sm font-semibold">
-                    🔴 {duplicateCount} {duplicateCount === 1 ? 'duplicitná reakcia' : 'duplicitné reakcie'}
-                  </span>
-                </div>
-              </div>
-            )}
-            <div className="rounded-lg glass-card border-blue-400/30 bg-blue-400/10 p-3">
-              <div className="flex items-center justify-between text-blue-400">
-                <span className="text-xs font-medium">Priemerný čas reakcie:</span>
-                <span className="text-sm font-bold">{avgResponseTime} min</span>
-              </div>
-              <div className="mt-1 text-xs text-gray-400">
-                Cieľ: &lt;15 min {avgResponseTime < 15 && '✓'}
-              </div>
-            </div>
-          </div>
-        )}
-
-        <ScrollArea className="h-[calc(100vh-280px)]">
+        <ScrollArea className="h-[calc(100vh-80px)]">
           <div className="space-y-2 p-2">
-            {filteredEmails.map((email) => (
+            {emails.map((email) => (
               <button
                 key={email.id}
                 onClick={() => {
@@ -1046,47 +945,19 @@ export function CustomerAgent() {
                   {getStatusBadge(email.status)}
                 </div>
                 <p className="mb-1 text-sm font-medium text-gray-200">{email.subject}</p>
-                
-                {/* Duplicate Response Warning */}
-                {email.hasDuplicateResponse && (
-                  <div className="mb-2 rounded border border-red-400/50 bg-red-400/10 px-2 py-1">
-                    <span className="text-xs font-semibold text-red-400">
-                      🔴 Duplicitná reakcia!
-                    </span>
-                  </div>
-                )}
-                
                 <p className="mb-2 line-clamp-2 text-xs text-gray-400">{email.body}</p>
-                
-                <div className="flex items-center justify-between gap-2 text-xs text-gray-500 mb-1">
-                  <div className="flex items-center gap-1">
-                    <Clock className="h-3 w-3" />
-                    {formatDate(email.receivedAt)}
-                  </div>
-                  {email.responseTime && (
-                    <span className="text-xs text-green-400">↪ {email.responseTime}min</span>
-                  )}
+                <div className="flex items-center gap-2 text-xs text-gray-500">
+                  <Clock className="h-3 w-3" />
+                  {formatDate(email.receivedAt)}
                 </div>
-                
-                {/* OZ Assignment */}
-                <div className="mt-2 flex items-center justify-between gap-2">
-                  {email.assignedOzId ? (
-                    <Badge variant="outline" className="border-blue-400/50 text-blue-400 text-xs">
-                      <Users className="h-3 w-3 mr-1" />
-                      {email.assignedOzName}
-                    </Badge>
-                  ) : (
-                    <Badge variant="outline" className="border-yellow-400/50 text-yellow-400 text-xs">
-                      <AlertTriangle className="h-3 w-3 mr-1" />
-                      Nepriradené
-                    </Badge>
-                  )}
-                  {email.aiAnalysis && (
+                {email.aiAnalysis && (
+                  <div className="mt-2 flex items-center gap-2">
                     <Badge variant="secondary" className="text-xs">
                       AI: {email.aiAnalysis.confidence}%
                     </Badge>
-                  )}
-                </div>
+                    <span className="text-xs">{getSentimentLabel(email.aiAnalysis.sentiment)}</span>
+                  </div>
+                )}
               </button>
             ))}
           </div>
@@ -1273,60 +1144,6 @@ export function CustomerAgent() {
 
                 {selectedEmail.aiAnalysis && (
                   <>
-                    {/* OZ Assignment Info */}
-                    <Card className={cn(
-                      "glass-card border",
-                      selectedEmail.assignedOzId 
-                        ? "border-blue-400/30 bg-blue-400/5" 
-                        : "border-yellow-400/30 bg-yellow-400/5"
-                    )}>
-                      <CardHeader className="pb-3">
-                        <CardTitle className="text-white flex items-center gap-2">
-                          {selectedEmail.assignedOzId ? (
-                            <>
-                              <Users className="h-5 w-5 text-blue-400" />
-                              Pridelené obchodnému zástupcovi
-                            </>
-                          ) : (
-                            <>
-                              <AlertTriangle className="h-5 w-5 text-yellow-400" />
-                              Nepriradený dopyt
-                            </>
-                          )}
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        {selectedEmail.assignedOzId ? (
-                          <div className="space-y-2">
-                            <div className="flex items-center justify-between">
-                              <span className="text-gray-400">Priradené:</span>
-                              <Badge variant="outline" className="border-blue-400/50 text-blue-400">
-                                {selectedEmail.assignedOzName}
-                              </Badge>
-                            </div>
-                            {selectedEmail.responseTime && (
-                              <div className="flex items-center justify-between">
-                                <span className="text-gray-400">Čas reakcie:</span>
-                                <span className="text-green-400 font-semibold">{selectedEmail.responseTime} min</span>
-                              </div>
-                            )}
-                          </div>
-                        ) : (
-                          <div className="space-y-3">
-                            <p className="text-yellow-400 text-sm font-medium">
-                              ⚠️ Tento dopyt ešte nebol priradený žiadnemu OZ
-                            </p>
-                            <div className="rounded-lg glass p-3 border border-blue-400/30">
-                              <p className="text-xs text-gray-400 mb-1">AI odporúča:</p>
-                              <p className="text-blue-400 font-semibold text-sm">
-                                {recommendOz(selectedEmail)}
-                              </p>
-                            </div>
-                          </div>
-                        )}
-                      </CardContent>
-                    </Card>
-
                     {/* Suggested Actions */}
                     <Card className="glass-card border-white/10">
                       <CardHeader>
