@@ -1096,10 +1096,8 @@ export function CustomerAgent() {
       {/* Email Detail & AI Analysis */}
       <div className="flex flex-1 flex-col">
         {selectedEmail ? (
-          <>
-            {/* Email Detail with Tabs */}
-            <div className="flex-1 overflow-y-auto border-b border-white/10 glass p-6">
-              <div className="mx-auto max-w-4xl">
+          <div className="flex-1 overflow-y-auto glass p-6">
+            <div className="mx-auto max-w-4xl">
                 <div className="mb-6">
                   <h1 className="mb-2 text-2xl font-bold text-white">{selectedEmail.subject}</h1>
                   <div className="flex items-center gap-4 text-sm text-gray-400">
@@ -1260,12 +1258,9 @@ export function CustomerAgent() {
                     )}
                   </div>
                 )}
-              </div>
-            </div>
 
-            {/* AI Analysis Panel - Actions & Results */}
-            <div className="h-[500px] overflow-y-auto glass-dark p-6">
-              <div className="mx-auto max-w-4xl space-y-4">
+                {/* AI Analysis Panel - Actions & Results */}
+                <div className="space-y-4 mt-6">
                 <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold text-white">
                   <TrendingUp className="h-5 w-5 text-blue-400" />
                   AI Analýza a odporúčanie
@@ -1409,9 +1404,9 @@ export function CustomerAgent() {
                     )}
                   </>
                 )}
-              </div>
+                </div>
             </div>
-          </>
+          </div>
         ) : (
           <div className="flex h-full items-center justify-center glass">
             <p className="text-gray-400">Vyberte email zo zoznamu</p>
