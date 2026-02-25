@@ -1,11 +1,11 @@
 [phases.setup]
-nixPkgs = ["nodejs_20", "npm-9_x"]
+nixPkgs = ["nodejs_20"]
 
 [phases.install]
-cmds = ["npm install", "cd client && npm install"]
+cmds = ["npm install", "cd client && npm install && cd .."]
 
 [phases.build]
-cmds = ["npm run build"]
+cmds = ["cd client && npx vite build && cd ..", "npx tsc --project tsconfig.server.json || true"]
 
 [start]
-cmd = "npm start"
+cmd = "node dist/index.js"
