@@ -29,10 +29,10 @@ export function Sidebar() {
   const location = useLocation();
 
   return (
-    <div className="flex h-screen w-64 flex-col bg-[#1a1a2e] text-white">
-      <div className="flex flex-col items-center justify-center border-b border-gray-700 p-6">
-        <h1 className="text-3xl font-bold tracking-tight">STRADER</h1>
-        <p className="text-sm text-gray-400">Agent</p>
+    <div className="flex h-screen w-64 flex-col glass-dark border-r border-white/10 backdrop-blur-xl">
+      <div className="flex flex-col items-center justify-center border-b border-white/10 p-6 space-y-2">
+        <h1 className="text-4xl font-bold tracking-tight gradient-text">STRADER</h1>
+        <p className="text-sm text-gray-400 font-medium">Agent</p>
       </div>
 
       <nav className="flex-1 space-y-1 p-4">
@@ -45,23 +45,29 @@ export function Sidebar() {
               key={item.path}
               to={item.path}
               className={cn(
-                'flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-colors',
+                'flex items-center gap-3 rounded-xl px-4 py-3.5 text-sm font-medium transition-all-smooth relative',
                 isActive
-                  ? 'bg-blue-600 text-white'
-                  : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                  ? 'glass gradient-bg text-white glow-border shadow-lg'
+                  : 'text-gray-300 hover:glass hover:text-white hover:scale-[1.02]'
               )}
             >
-              <Icon className="h-5 w-5" />
-              {item.title}
+              <Icon className={cn(
+                "h-5 w-5 transition-all",
+                isActive && "drop-shadow-[0_0_8px_rgba(255,255,255,0.8)]"
+              )} />
+              <span>{item.title}</span>
+              {isActive && (
+                <div className="absolute inset-0 gradient-bg opacity-20 rounded-xl blur-xl -z-10" />
+              )}
             </Link>
           );
         })}
       </nav>
 
-      <div className="border-t border-gray-700 p-4">
-        <div className="text-xs text-gray-500">
-          <p>© 2024 Strader Agent</p>
-          <p className="mt-1">v1.0.0</p>
+      <div className="border-t border-white/10 p-4 glass">
+        <div className="text-xs text-gray-500 space-y-1">
+          <p className="font-medium">© 2024 Strader Agent</p>
+          <p className="text-gray-600">v1.0.0</p>
         </div>
       </div>
     </div>
