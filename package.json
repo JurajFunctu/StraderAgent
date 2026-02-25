@@ -10,8 +10,7 @@
     "start": "npx tsx server/index.ts",
     "db:generate": "drizzle-kit generate",
     "db:push": "drizzle-kit push",
-    "db:seed": "tsx server/seed.ts",
-    "postinstall": "cd client && npm install"
+    "db:seed": "tsx server/seed.ts"
   },
   "dependencies": {
     "@neondatabase/serverless": "^0.9.0",
@@ -19,7 +18,31 @@
     "dotenv": "^16.4.1",
     "drizzle-orm": "^0.29.3",
     "express": "^4.18.2",
-    "pg": "^8.11.3"
+    "pg": "^8.11.3",
+    "@radix-ui/react-dialog": "^1.0.5",
+    "@radix-ui/react-dropdown-menu": "^2.0.6",
+    "@radix-ui/react-label": "^2.0.2",
+    "@radix-ui/react-scroll-area": "^1.0.5",
+    "@radix-ui/react-select": "^2.0.0",
+    "@radix-ui/react-separator": "^1.0.3",
+    "@radix-ui/react-slot": "^1.0.2",
+    "@radix-ui/react-tabs": "^1.0.4",
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.1.0",
+    "lucide-react": "^0.316.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.21.3",
+    "recharts": "^2.12.0",
+    "tailwind-merge": "^2.2.1",
+    "vite": "^5.0.12",
+    "@vitejs/plugin-react": "^4.2.1",
+    "autoprefixer": "^10.4.17",
+    "postcss": "^8.4.33",
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5.3.3",
+    "@types/react": "^18.2.48",
+    "@types/react-dom": "^18.2.18"
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",
