@@ -676,7 +676,7 @@ export function InvoiceAgent() {
             <CardContent>
               <div className="space-y-3">
                 {receivedInvoices.map((invoice) => {
-                  const items = JSON.parse(invoice.items || '[]');
+                  const items = typeof invoice.items === 'string' ? JSON.parse(invoice.items || '[]') : (invoice.items || []);
                   const hasDiscrepancy = items.some((item: any) => item.note);
 
                   return (
