@@ -2,8 +2,47 @@ import { Router } from 'express';
 import { db } from './db.js';
 import * as schema from './schema.js';
 import { eq, desc, and, like, or, sql } from 'drizzle-orm';
+import { exec } from 'child_process';
+import { promisify } from 'util';
 
+const execAsync = promisify(exec);
 const router = Router();
+
+// Setup endpoint - runs migrations and seeds
+router.post('/api/setup', async (req, res) => {
+  try {
+    console.log('🔧 Starting database setup...');
+    
+    // Run db:push to create tables
+    console.log('📊 Pushing schema to database...');
+    const { stdout: pushOutput, stderr: pushError } = await execAsync('npm run db:push');
+    console.log('Push output:', pushOutput);
+    if (pushError) console.log('Push stderr:', pushError);
+    
+    // Run db:seed to populate data
+    console.log('🌱 Seeding database...');
+    const { stdout: seedOutput, stderr: seedError } = await execAsync('npm run db:seed');
+    console.log('Seed output:', seedOutput);
+    if (seedError) console.log('Seed stderr:', seedError);
+    
+    res.json({ 
+      success: true, 
+      message: 'Database setup completed successfully',
+      details: {
+        push: pushOutput,
+        seed: seedOutput
+      }
+    });
+  } catch (error: any) {
+    console.error('❌ Setup failed:', error);
+    res.status(500).json({ 
+      error: 'Database setup failed', 
+      details: error.message,
+      stdout: error.stdout,
+      stderr: error.stderr
+    });
+  }
+});
 
 // Sales Reps
 router.get('/api/sales-reps', async (req, res) => {
