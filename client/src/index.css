@@ -4,24 +4,24 @@
 
 @layer base {
   :root {
-    --background: 240 12% 12%; /* Lighter dark navy */
+    --background: 220 35% 18%;
     --foreground: 210 40% 98%;
-    --card: 240 12% 16%;
+    --card: 220 35% 22%;
     --card-foreground: 210 40% 98%;
-    --popover: 240 12% 16%;
+    --popover: 220 35% 22%;
     --popover-foreground: 210 40% 98%;
     --primary: 217.2 91.2% 59.8%; /* Blue */
     --primary-foreground: 210 40% 98%;
     --secondary: 270 60% 50%; /* Purple */
     --secondary-foreground: 210 40% 98%;
-    --muted: 240 12% 24%;
+    --muted: 220 35% 28%;
     --muted-foreground: 215.4 16.3% 65%;
     --accent: 217.2 91.2% 59.8%;
     --accent-foreground: 210 40% 98%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
-    --border: 240 10% 20%;
-    --input: 240 10% 20%;
+    --border: 220 35% 25%;
+    --input: 220 35% 25%;
     --ring: 217.2 91.2% 59.8%;
     --radius: 0.75rem;
   }
@@ -35,7 +35,7 @@
   body {
     @apply bg-background text-foreground;
     font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
-    background: linear-gradient(135deg, #1a1f3a 0%, #24294a 50%, #1a1f3a 100%);
+    background: linear-gradient(135deg, #1e2a4a 0%, #2a3660 50%, #1e2a4a 100%);
     background-attachment: fixed;
   }
 }
@@ -50,14 +50,14 @@
   }
   
   .glass-dark {
-    background: rgba(15, 20, 40, 0.6);
+    background: rgba(15, 25, 50, 0.6);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     border: 1px solid rgba(255, 255, 255, 0.15);
   }
   
   .glass-card {
-    background: rgba(255, 255, 255, 0.06);
+    background: rgba(255, 255, 255, 0.08);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border: 1px solid rgba(255, 255, 255, 0.15);

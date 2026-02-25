@@ -559,9 +559,33 @@ export function CustomerAgent() {
   const [selectedEmail, setSelectedEmail] = useState<Email | null>(null);
   const [loading, setLoading] = useState(true);
   const [actionResult, setActionResult] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<'ai' | 'original'>('ai');
+  const [qKeyPressed, setQKeyPressed] = useState(false);
 
   useEffect(() => {
     loadData();
+  }, []);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'q' || e.key === 'Q') {
+        setQKeyPressed(true);
+      }
+    };
+
+    const handleKeyUp = (e: KeyboardEvent) => {
+      if (e.key === 'q' || e.key === 'Q') {
+        setQKeyPressed(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+    };
   }, []);
 
   const loadData = async () => {
@@ -944,7 +968,7 @@ export function CustomerAgent() {
       <div className="flex flex-1 flex-col">
         {selectedEmail ? (
           <>
-            {/* Email Detail */}
+            {/* Email Detail with Tabs */}
             <div className="flex-1 overflow-y-auto border-b border-white/10 glass p-6">
               <div className="mx-auto max-w-4xl">
                 <div className="mb-6">
@@ -965,13 +989,152 @@ export function CustomerAgent() {
                   </div>
                 </div>
 
-                <div className="whitespace-pre-wrap rounded-xl glass-card p-6 text-gray-200">
-                  {selectedEmail.body}
+                {/* Tabs */}
+                <div className="mb-4 flex gap-2">
+                  <button
+                    onClick={() => setActiveTab('ai')}
+                    className={cn(
+                      'px-4 py-2 rounded-lg font-medium transition-all-smooth',
+                      (activeTab === 'ai' && !qKeyPressed)
+                        ? 'glass gradient-bg text-white'
+                        : 'glass-card text-gray-400 hover:text-white'
+                    )}
+                  >
+                    🤖 AI Analýza
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('original')}
+                    className={cn(
+                      'px-4 py-2 rounded-lg font-medium transition-all-smooth',
+                      (activeTab === 'original' || qKeyPressed)
+                        ? 'glass gradient-bg text-white'
+                        : 'glass-card text-gray-400 hover:text-white'
+                    )}
+                  >
+                    📧 Originál {qKeyPressed && '(Q held)'}
+                  </button>
                 </div>
+
+                {/* Content based on active tab or Q key */}
+                {(activeTab === 'original' || qKeyPressed) ? (
+                  <div className="whitespace-pre-wrap rounded-xl glass-card p-6 text-gray-200">
+                    {selectedEmail.body}
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {selectedEmail.aiAnalysis && (
+                      <>
+                        {/* Top Row: Customer, Value, Confidence */}
+                        <div className="grid gap-4 md:grid-cols-3">
+                          <Card className="glass-card border-white/10">
+                            <CardHeader className="pb-3">
+                              <CardTitle className="text-sm font-medium text-gray-300">Rozpoznaný zákazník</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                              <p className="font-semibold text-white">{selectedEmail.aiAnalysis.recognizedCustomer.company}</p>
+                              <p className="text-sm text-gray-400">{selectedEmail.aiAnalysis.recognizedCustomer.name}</p>
+                              <div className="mt-3 space-y-1 text-xs text-gray-400">
+                                <p>Objednávky: <span className="font-semibold text-white">{selectedEmail.aiAnalysis.recognizedCustomer.totalOrders}</span></p>
+                                <p>Posledná obj.: <span className="font-semibold text-white">{formatDate(selectedEmail.aiAnalysis.recognizedCustomer.lastOrderDate)}</span></p>
+                                <p>Splatnosť: <span className="font-semibold text-white">{selectedEmail.aiAnalysis.recognizedCustomer.creditTerms} dní</span></p>
+                                <p>Zľava: <span className="font-semibold text-green-400">{selectedEmail.aiAnalysis.recognizedCustomer.discount}%</span></p>
+                              </div>
+                            </CardContent>
+                          </Card>
+
+                          <Card className="glass-card border-white/10">
+                            <CardHeader className="pb-3">
+                              <CardTitle className="text-sm font-medium text-gray-300">Odhadovaná hodnota dopytu</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                              <p className="text-3xl font-bold text-blue-400 flex items-center gap-1">
+                                <Euro className="h-6 w-6" />
+                                {selectedEmail.aiAnalysis.estimatedValue.toLocaleString('sk-SK', { minimumFractionDigits: 2 })}
+                              </p>
+                              <p className="text-sm text-gray-400 mt-1">
+                                {selectedEmail.aiAnalysis.extractedItems.length} položiek identifikovaných
+                              </p>
+                              <div className="mt-3">
+                                <div className="flex items-center gap-2 text-xs">
+                                  {getSentimentIcon(selectedEmail.aiAnalysis.sentiment)}
+                                  <span className="text-gray-400">Sentiment: {getSentimentLabel(selectedEmail.aiAnalysis.sentiment)}</span>
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+
+                          <Card className={cn("glass-card border", getConfidenceColor(selectedEmail.aiAnalysis.confidence))}>
+                            <CardHeader className="pb-3">
+                              <CardTitle className="text-sm font-medium">AI Confidence</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                              <p className="text-3xl font-bold flex items-center gap-1">
+                                <Target className="h-6 w-6" />
+                                {selectedEmail.aiAnalysis.confidence}%
+                              </p>
+                              <div className="mt-3 h-2 rounded-full bg-white/10 overflow-hidden">
+                                <div 
+                                  className={cn(
+                                    "h-full rounded-full transition-all",
+                                    selectedEmail.aiAnalysis.confidence > 80 ? 'bg-green-500' :
+                                    selectedEmail.aiAnalysis.confidence > 50 ? 'bg-yellow-500' : 'bg-red-500'
+                                  )}
+                                  style={{ width: `${selectedEmail.aiAnalysis.confidence}%` }}
+                                />
+                              </div>
+                              <p className="text-xs mt-2">
+                                {selectedEmail.aiAnalysis.confidence > 80 ? 'Vysoká spoľahlivosť' :
+                                 selectedEmail.aiAnalysis.confidence > 50 ? 'Stredná spoľahlivosť' : 'Nízka spoľahlivosť'}
+                              </p>
+                            </CardContent>
+                          </Card>
+                        </div>
+
+                        {/* Extracted Items */}
+                        {selectedEmail.aiAnalysis.extractedItems.length > 0 && (
+                          <Card className="glass-card border-white/10">
+                            <CardHeader>
+                              <CardTitle className="text-white flex items-center gap-2">
+                                <Package className="h-5 w-5 text-blue-400" />
+                                Extrahované položky z emailu
+                              </CardTitle>
+                              <CardDescription className="text-gray-400">
+                                AI rozpoznalo tieto produkty a párovalo ich s katalógom
+                              </CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                              <div className="space-y-2">
+                                {selectedEmail.aiAnalysis.extractedItems.map((item, idx) => (
+                                  <div key={idx} className="flex items-center justify-between rounded-lg glass p-3 border border-white/10">
+                                    <div className="flex-1">
+                                      <p className="font-semibold text-white">{item.product}</p>
+                                      <p className="text-xs text-gray-400">Kód: {item.matchedCode} | Sklad: {item.currentStock} ks</p>
+                                    </div>
+                                    <div className="text-right">
+                                      <p className="font-semibold text-white">{item.quantity}x</p>
+                                      <p className="text-xs text-gray-400">{formatCurrency(item.unitPrice)}/ks</p>
+                                    </div>
+                                    <div className="text-right ml-4">
+                                      <p className="font-bold text-blue-400">{formatCurrency(item.quantity * item.unitPrice)}</p>
+                                    </div>
+                                  </div>
+                                ))}
+                                <div className="flex justify-between items-center pt-2 border-t border-white/10 mt-2">
+                                  <p className="font-semibold text-white">CELKOM:</p>
+                                  <p className="text-2xl font-bold text-blue-400">{formatCurrency(selectedEmail.aiAnalysis.estimatedValue)}</p>
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        )}
+                      </>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
 
-            {/* AI Analysis Panel */}
+            {/* AI Analysis Panel - Actions & Results */}
             <div className="h-[500px] overflow-y-auto glass-dark p-6">
               <div className="mx-auto max-w-4xl space-y-4">
                 <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold text-white">
@@ -981,110 +1144,6 @@ export function CustomerAgent() {
 
                 {selectedEmail.aiAnalysis && (
                   <>
-                    {/* Top Row: Customer, Value, Confidence */}
-                    <div className="grid gap-4 md:grid-cols-3">
-                      <Card className="glass-card border-white/10">
-                        <CardHeader className="pb-3">
-                          <CardTitle className="text-sm font-medium text-gray-300">Rozpoznaný zákazník</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <p className="font-semibold text-white">{selectedEmail.aiAnalysis.recognizedCustomer.company}</p>
-                          <p className="text-sm text-gray-400">{selectedEmail.aiAnalysis.recognizedCustomer.name}</p>
-                          <div className="mt-3 space-y-1 text-xs text-gray-400">
-                            <p>Objednávky: <span className="font-semibold text-white">{selectedEmail.aiAnalysis.recognizedCustomer.totalOrders}</span></p>
-                            <p>Posledná obj.: <span className="font-semibold text-white">{formatDate(selectedEmail.aiAnalysis.recognizedCustomer.lastOrderDate)}</span></p>
-                            <p>Splatnosť: <span className="font-semibold text-white">{selectedEmail.aiAnalysis.recognizedCustomer.creditTerms} dní</span></p>
-                            <p>Zľava: <span className="font-semibold text-green-400">{selectedEmail.aiAnalysis.recognizedCustomer.discount}%</span></p>
-                          </div>
-                        </CardContent>
-                      </Card>
-
-                      <Card className="glass-card border-white/10">
-                        <CardHeader className="pb-3">
-                          <CardTitle className="text-sm font-medium text-gray-300">Odhadovaná hodnota dopytu</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <p className="text-3xl font-bold text-blue-400 flex items-center gap-1">
-                            <Euro className="h-6 w-6" />
-                            {selectedEmail.aiAnalysis.estimatedValue.toLocaleString('sk-SK', { minimumFractionDigits: 2 })}
-                          </p>
-                          <p className="text-sm text-gray-400 mt-1">
-                            {selectedEmail.aiAnalysis.extractedItems.length} položiek identifikovaných
-                          </p>
-                          <div className="mt-3">
-                            <div className="flex items-center gap-2 text-xs">
-                              {getSentimentIcon(selectedEmail.aiAnalysis.sentiment)}
-                              <span className="text-gray-400">Sentiment: {getSentimentLabel(selectedEmail.aiAnalysis.sentiment)}</span>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-
-                      <Card className={cn("glass-card border", getConfidenceColor(selectedEmail.aiAnalysis.confidence))}>
-                        <CardHeader className="pb-3">
-                          <CardTitle className="text-sm font-medium">AI Confidence</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <p className="text-3xl font-bold flex items-center gap-1">
-                            <Target className="h-6 w-6" />
-                            {selectedEmail.aiAnalysis.confidence}%
-                          </p>
-                          <div className="mt-3 h-2 rounded-full bg-white/10 overflow-hidden">
-                            <div 
-                              className={cn(
-                                "h-full rounded-full transition-all",
-                                selectedEmail.aiAnalysis.confidence > 80 ? 'bg-green-500' :
-                                selectedEmail.aiAnalysis.confidence > 50 ? 'bg-yellow-500' : 'bg-red-500'
-                              )}
-                              style={{ width: `${selectedEmail.aiAnalysis.confidence}%` }}
-                            />
-                          </div>
-                          <p className="text-xs mt-2">
-                            {selectedEmail.aiAnalysis.confidence > 80 ? 'Vysoká spoľahlivosť' :
-                             selectedEmail.aiAnalysis.confidence > 50 ? 'Stredná spoľahlivosť' : 'Nízka spoľahlivosť'}
-                          </p>
-                        </CardContent>
-                      </Card>
-                    </div>
-
-                    {/* Extracted Items */}
-                    {selectedEmail.aiAnalysis.extractedItems.length > 0 && (
-                      <Card className="glass-card border-white/10">
-                        <CardHeader>
-                          <CardTitle className="text-white flex items-center gap-2">
-                            <Package className="h-5 w-5 text-blue-400" />
-                            Extrahované položky z emailu
-                          </CardTitle>
-                          <CardDescription className="text-gray-400">
-                            AI rozpoznalo tieto produkty a párovalo ich s katalógom
-                          </CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="space-y-2">
-                            {selectedEmail.aiAnalysis.extractedItems.map((item, idx) => (
-                              <div key={idx} className="flex items-center justify-between rounded-lg glass p-3 border border-white/10">
-                                <div className="flex-1">
-                                  <p className="font-semibold text-white">{item.product}</p>
-                                  <p className="text-xs text-gray-400">Kód: {item.matchedCode} | Sklad: {item.currentStock} ks</p>
-                                </div>
-                                <div className="text-right">
-                                  <p className="font-semibold text-white">{item.quantity}x</p>
-                                  <p className="text-xs text-gray-400">{formatCurrency(item.unitPrice)}/ks</p>
-                                </div>
-                                <div className="text-right ml-4">
-                                  <p className="font-bold text-blue-400">{formatCurrency(item.quantity * item.unitPrice)}</p>
-                                </div>
-                              </div>
-                            ))}
-                            <div className="flex justify-between items-center pt-2 border-t border-white/10 mt-2">
-                              <p className="font-semibold text-white">CELKOM:</p>
-                              <p className="text-2xl font-bold text-blue-400">{formatCurrency(selectedEmail.aiAnalysis.estimatedValue)}</p>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    )}
-
                     {/* Suggested Actions */}
                     <Card className="glass-card border-white/10">
                       <CardHeader>
