@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Mail, FileText, Package, BarChart3 } from 'lucide-react';
+import { Mail, FileText, Package, BarChart3, AlertTriangle, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const menuItems = [
@@ -19,6 +19,16 @@ const menuItems = [
     path: '/products',
   },
   {
+    title: 'Reklamácie',
+    icon: AlertTriangle,
+    path: '/complaints',
+  },
+  {
+    title: 'Zákazníci',
+    icon: Users,
+    path: '/customers',
+  },
+  {
     title: 'Prehľady',
     icon: BarChart3,
     path: '/dashboard',
@@ -35,7 +45,7 @@ export function Sidebar() {
         <p className="text-sm text-gray-400 font-medium">Agent</p>
       </div>
 
-      <nav className="flex-1 space-y-1 p-4">
+      <nav className="flex-1 space-y-1 p-4 overflow-y-auto">
         {menuItems.map((item) => {
           const Icon = item.icon;
           const isActive = location.pathname === item.path;
@@ -67,7 +77,7 @@ export function Sidebar() {
       <div className="border-t border-white/10 p-4 glass">
         <div className="text-xs text-gray-500 space-y-1">
           <p className="font-medium">© 2024 Strader Agent</p>
-          <p className="text-gray-600">v1.0.0</p>
+          <p className="text-gray-600">v2.0.0 - AI Enhanced</p>
         </div>
       </div>
     </div>
