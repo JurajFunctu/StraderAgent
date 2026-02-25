@@ -6,7 +6,7 @@
     "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
     "dev:server": "tsx watch server/index.ts",
     "dev:client": "cd client && npm run dev",
-    "build": "vite build --config client/vite.config.ts",
+    "build": "cd client && ../node_modules/.bin/vite build",
     "start": "npx tsx server/index.ts",
     "db:generate": "drizzle-kit generate",
     "db:push": "drizzle-kit push",
