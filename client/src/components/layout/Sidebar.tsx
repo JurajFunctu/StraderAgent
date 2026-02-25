@@ -41,8 +41,8 @@ export function Sidebar() {
   return (
     <div className="flex h-screen w-64 flex-col glass-dark border-r border-white/10 backdrop-blur-xl">
       <div className="flex flex-col items-center justify-center border-b border-white/10 p-6 space-y-2">
-        <h1 className="text-4xl font-bold tracking-tight gradient-text">STRADER</h1>
-        <p className="text-sm text-gray-400 font-medium">Agent</p>
+        <h1 className="text-4xl font-bold tracking-tight gradient-text">Agent</h1>
+        <p className="text-sm text-gray-400 font-medium">STRADER</p>
       </div>
 
       <nav className="flex-1 space-y-1 p-4 overflow-y-auto">
