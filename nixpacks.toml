@@ -1,11 +1,13 @@
+providers = []
+
 [phases.setup]
 nixPkgs = ["nodejs_20"]
 
 [phases.install]
-cmds = ["npm install", "cd client && npm install && cd .."]
+cmds = ["npm install", "cd client && npm install"]
 
 [phases.build]
-cmds = ["cd client && npx vite build && cd ..", "npx tsc --project tsconfig.server.json || true"]
+cmds = ["cd client && npx vite build", "npx tsc --project tsconfig.server.json || true"]
 
 [start]
 cmd = "node dist/index.js"
