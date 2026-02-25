@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import {
   TrendingUp,
-  Users,
-  Package,
+
+
   FileText,
   Mail,
   CheckCircle,
@@ -22,17 +22,16 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend,
   ResponsiveContainer,
 } from 'recharts';
 import { api } from '@/lib/api';
 import { formatCurrency } from '@/lib/utils';
 
-const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
+const _COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
 
 export function Dashboard() {
   const [stats, setStats] = useState<any[]>([]);
-  const [summary, setSummary] = useState<any>(null);
+  const [_summary, setSummary] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
